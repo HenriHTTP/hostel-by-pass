@@ -1,11 +1,11 @@
-mod helpers;
+mod helper;
+mod entity;
 mod controller;
 mod repository;
 use controller::create_reservation::hello_world;
-use helpers::fallback::api_fallback;
+use helper::fallback::api_fallback;
 use std::net::SocketAddr;
 use axum::{Router, Server};
-
 
 #[tokio::main]
 async fn main() {
