@@ -9,7 +9,7 @@ pub struct Reservation {
     check_in_date: String,
     check_out_date: String,
     num_guests: u32,
-    special_requests: Option<Vec<String>>
+    special_requests: Option<Vec<String>>,
 }
 
 impl Reservation {
