@@ -1,7 +1,3 @@
-pub fn hello_world() {
-    println!("hello world, create_reservation module!!");
-}
-
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
