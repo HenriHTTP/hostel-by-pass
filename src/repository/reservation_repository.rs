@@ -7,10 +7,10 @@ pub struct ReservationRepository {
 }
 
 impl ReservationRepository {
-    pub fn new(collection: Collection<Reservation>) -> Self{
+    pub fn new(collection: Collection<Reservation>) -> Self {
         ReservationRepository { collection }
     }
-    pub async fn insert(&self, reservation: Reservation) -> Result<(),Error>{
+    pub async fn insert(&self, reservation: Reservation) -> Result<(), Error> {
         self.collection.insert_one(reservation, None).await?;
         Ok(())
     }
