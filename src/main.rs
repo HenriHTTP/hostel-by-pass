@@ -1,20 +1,25 @@
 mod helper;
 mod entity;
-use helper::fallback::api_fallback;
 mod controller;
-use controller::create_reservation::hello_world;
 mod repository;
-use std::net::SocketAddr;
+mod route;
+
+use route::routes::routes;
 use axum::Router;
-use axum::Server;
-use axum::routing::post;
+use axum::serve;
+use tokio::net::TcpListener;
+use dotenv::dotenv;
+use std::env;
+
 
 #[tokio::main]
 async fn main() {
-    let api: Router = Router::new().fallback(api_fallback);
-    let app: Router = Router::new().nest("/api", api);
-    let address: SocketAddr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    let server = Server::bind(&address).serve(app.into_make_service());
-    hello_world();
+    let host: String = env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let port: String= env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let addr: String= format!("{}:{}", host, port);
+    let app: Router = Router::new().nest("/api", routes());
+    let address : TcpListener = TcpListener::bind(&addr).await.unwrap();
+    let server = serve(address, app);
+    println!("app listening at http://localhost:{}", &addr);
     server.await.unwrap();
 }
