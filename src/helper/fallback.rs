@@ -1,6 +1,7 @@
 use axum::http::StatusCode;
 use axum::Json;
-use serde_json::{json, Value};
+use serde_json::json;
+use serde_json::Value;
 
 pub async fn api_fallback() -> (StatusCode, Json<Value>) {
     let body_response: Value = json!({
