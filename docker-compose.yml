@@ -1,0 +1,15 @@
+version: '3'
+services:
+  mongo:
+    build: src
+    image: mongo:5.0.2
+    container_name: hostel-by-pass
+    restart: always
+    ports:
+      - "${DB_PORT_APP}:${DB_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - .:/app/data
+volumes:
+  db:
