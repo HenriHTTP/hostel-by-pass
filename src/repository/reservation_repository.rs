@@ -1,5 +1,6 @@
-use mongodb::Collection;
+use mongodb::{Collection, Database};
 use mongodb::error::Error;
+use mongodb::Client;
 use crate::entity::reservation::Reservation;
 
 pub struct ReservationRepository {
@@ -7,10 +8,13 @@ pub struct ReservationRepository {
 }
 
 impl ReservationRepository {
-    pub fn new(collection: Collection<Reservation>) -> Self {
-        ReservationRepository { collection }
+    pub async fn new(uri: &str, db_name: &str, collection_name: &str) -> Result<Self, Error> {
+        let client: Client = Client::with_uri_str(uri).await?;
+        let database: Database = client.database(db_name);
+        let collection = database.collection(collection_name);
+        Ok(ReservationRepository { collection })
     }
-    pub async fn insert(&self, reservation: Reservation) -> Result<(), Error> {
+   pub async fn insert(&self, reservation: Reservation) -> Result<(), Error> {
         self.collection.insert_one(reservation, None).await?;
         Ok(())
     }
