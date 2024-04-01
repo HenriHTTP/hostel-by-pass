@@ -6,6 +6,6 @@ use crate::helper::fallback::api_fallback;
 
 pub fn routes () -> Router{
     Router::new()
-        // .route("/create_reservation",post(create_reservation))
+        .route("/create_reservation",post(create_reservation))
         .fallback(api_fallback)
 }
