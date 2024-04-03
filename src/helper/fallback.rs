@@ -10,6 +10,5 @@ pub async fn api_fallback() -> (StatusCode, Json<Value>) {
         "message": "Route not found. Please check the URL and try again later."
         }
     });
-
     (StatusCode::NOT_FOUND, Json(body_response))
 }
