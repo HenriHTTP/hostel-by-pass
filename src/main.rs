@@ -10,7 +10,7 @@ use axum::serve;
 use tokio::net::TcpListener;
 use dotenv::dotenv;
 use std::env;
-
+use axum::serve::Serve;
 
 #[tokio::main]
 async fn main() {
@@ -20,6 +20,7 @@ async fn main() {
     let addr: String = format!("{}:{}", host, port);
     let app: Router = Router::new().nest("/api", routes());
     let address: TcpListener = TcpListener::bind(&addr).await.unwrap();
-    let server = serve(address, app);println!("app listening at http://localhost:{}", &port);
-    server.await.unwrap();
+    let server_app: Serve<Router, Router> = serve(address, app);
+    println!("app listening at http://localhost:{}", &port);
+    server_app.await.unwrap();
 }
