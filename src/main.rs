@@ -20,7 +20,6 @@ async fn main() {
     let addr: String = format!("{}:{}", host, port);
     let app: Router = Router::new().nest("/api", routes());
     let address: TcpListener = TcpListener::bind(&addr).await.unwrap();
-    let server = serve(address, app);
-    println!("app listening at http://localhost:{}", &addr);
+    let server = serve(address, app);println!("app listening at http://localhost:{}", &port);
     server.await.unwrap();
 }
