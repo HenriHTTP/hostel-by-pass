@@ -1,7 +1,16 @@
-use mongodb::{Collection, Database};
+use mongodb::Collection;
+use mongodb::Cursor;
+use mongodb::Database;
 use mongodb::error::Error;
 use mongodb::Client;
+use mongodb::bson::doc;
+use serde_json::to_string;
+use futures::StreamExt;
+use mongodb::bson::Document;
+use mongodb::bson::from_document;
 use crate::entity::reservation::Reservation;
+use crate::entity::email_reservation::ReservationEmail;
+
 
 pub struct ReservationRepository {
     collection: Collection<Reservation>,
@@ -16,6 +25,11 @@ impl ReservationRepository {
     }
     pub async fn insert(&self, reservation: Reservation) -> Result<(), Error> {
         self.collection.insert_one(reservation, None).await?;
+        Ok(())
+    }
+    pub async fn get_reservation_by_email(&self, reservation_email: ReservationEmail) -> Result<(), Error> {
+        let email = reservation_email.email;
+        let _ = self.collection.find(doc! {"email": &email}, None).await;
         Ok(())
     }
 }
