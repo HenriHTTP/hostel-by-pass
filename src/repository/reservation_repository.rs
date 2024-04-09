@@ -4,10 +4,7 @@ use mongodb::Database;
 use mongodb::error::Error;
 use mongodb::Client;
 use mongodb::bson::doc;
-use serde_json::to_string;
 use futures::StreamExt;
-use mongodb::bson::Document;
-use mongodb::bson::from_document;
 use crate::entity::reservation::Reservation;
 use crate::entity::email_reservation::ReservationEmail;
 
@@ -27,9 +24,20 @@ impl ReservationRepository {
         self.collection.insert_one(reservation, None).await?;
         Ok(())
     }
-    pub async fn get_reservation_by_email(&self, reservation_email: ReservationEmail) -> Result<(), Error> {
-        let email = reservation_email.email;
-        let _ = self.collection.find(doc! {"email": &email}, None).await;
-        Ok(())
+    pub async fn get_reservation_from_email(&self, reservation_email: ReservationEmail) -> Result<Vec<String>, Error> {
+        let email: String = reservation_email.email;
+        let mut cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &email}, None).await.unwrap();
+        let mut reservation_result: Vec<String> = Vec::new();
+        while let Some(document) = cursor.next().await {
+            match document {
+                Ok(document_from_database) => {
+                    let reservation_json: String = serde_json::to_string(&document_from_database
+                    ).unwrap();
+                    reservation_result.push(reservation_json);
+                }
+                Err(err) => return Err(err.into()),
+            }
+        }
+        Ok(reservation_result)
     }
 }
