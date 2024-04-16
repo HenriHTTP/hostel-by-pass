@@ -31,8 +31,8 @@ pub async fn create_reservation(Json(reservation): Json<Reservation>) -> impl In
             let success: Value = message_json::send_message(200, "reservation create with success.").await;
             return (StatusCode::CREATED, Json(success));
         }
-        Err(_) => {
-            let error: Value = message_json::send_message_error(404, "there was an unexpected error please try later.").await;
+        Err(error) => {
+            let error: Value = message_json::send_message_error(404, format!("failed:{}", &error.to_string())).await;
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(error));
         }
     }
