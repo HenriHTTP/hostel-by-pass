@@ -32,7 +32,7 @@ pub async fn create_reservation(Json(reservation): Json<Reservation>) -> impl In
             return (StatusCode::CREATED, Json(success));
         }
         Err(error) => {
-            let error: Value = message_json::send_message_error(404, format!("failed:{}", &error.to_string())).await;
+            let error: Value = message_json::send_message_error(404, format!("Failed:{}", error.to_string()).as_str()).await;
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(error));
         }
     }
@@ -47,7 +47,7 @@ async fn is_valid_reservation(reservation: &Reservation) -> Result<(), (StatusCo
     ];
     for (field, field_name) in required_fields {
         if field.is_empty() {
-            let error_message: Value = message_json::send_message_error(400, format!("{} field is required.", field_name)).await;
+            let error_message: Value = message_json::send_message_error(400, format!("{} field is required.", field_name).as_str()).await;
             return Err((StatusCode::BAD_REQUEST, Json(error_message)));
         }
     }
