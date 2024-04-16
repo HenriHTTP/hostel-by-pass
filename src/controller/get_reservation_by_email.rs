@@ -1,9 +1,9 @@
 use crate::entity::email_reservation::ReservationEmail;
 use crate::repository::reservation_repository::ReservationRepository;
+use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
-use serde_json::json;
 use serde_json::Value;
 use std::env;
 use mongodb::error::Error;
@@ -17,19 +17,13 @@ pub async fn get_reservation_by_email(Json(reservation_email): Json<ReservationE
         &db_name,
         &collection_name,
     ).await;
-
     match repository {
         Ok(repository) => {
             let result_from_email: Vec<Value> = repository.get_reservation_from_email(reservation_email).await.unwrap();
             Ok((StatusCode::CREATED, Json(result_from_email)))
         }
         Err(error) => {
-            let error_json: Value = json!({
-                "error": {
-                    "code": 404,
-                    "message": error.to_string()
-             }
-            });
+            let error_json: Value = message_json::send_message_error(400, &error.to_string()).await;
             Err((StatusCode::BAD_REQUEST, Json(error_json)))
         }
     }
