@@ -3,6 +3,7 @@ mod entity;
 mod controller;
 mod repository;
 mod route;
+mod service;
 
 use route::routes::routes;
 use axum::Router;
