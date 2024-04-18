@@ -1,5 +1,6 @@
 use crate::entity::reservation::Reservation;
 use crate::repository::reservation_repository::ReservationRepository;
+use crate::service::email;
 use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -7,14 +8,15 @@ use axum::Json;
 use serde_json::Value;
 use std::env;
 use mongodb::error::Error;
-use regex::Regex;
+
 
 
 pub async fn create_reservation(Json(reservation): Json<Reservation>) -> impl IntoResponse {
     if let Err(error) = is_valid_reservation(&reservation).await {
         return error;
     }
-    if let Err(error) = is_valid_email(&reservation).await {
+    let email_reservation: &String = &reservation.email;
+    if let Err(error) = email::is_valid_email(&email_reservation).await {
         return error;
     }
     let collection_name: String = env::var("COLLECTION_NAME").unwrap_or_default();
@@ -50,18 +52,6 @@ async fn is_valid_reservation(reservation: &Reservation) -> Result<(), (StatusCo
             let error_message: Value = message_json::send_message_error(400, format!("{} field is required.", field_name).as_str()).await;
             return Err((StatusCode::BAD_REQUEST, Json(error_message)));
         }
-    }
-    Ok(())
-}
-
-async fn is_valid_email(reservation: &Reservation) -> Result<(), (StatusCode, Json<Value>)> {
-    let valid_email_pattern: Regex = Regex::new(
-        r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-        .unwrap();
-    let email_is_valid: bool = valid_email_pattern.is_match(&reservation.email);
-    if !email_is_valid {
-        let error_message: Value = message_json::send_message_error(400, "this email is not valid try use a valid email!").await;
-        return Err((StatusCode::BAD_REQUEST, Json(error_message)));
     }
     Ok(())
 }
