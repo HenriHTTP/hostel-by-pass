@@ -1,5 +1,6 @@
 use crate::entity::email_reservation::ReservationEmail;
 use crate::repository::reservation_repository::ReservationRepository;
+use crate::service::email;
 use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -17,13 +18,17 @@ pub async fn get_reservation_by_email(Json(reservation_email): Json<ReservationE
         &db_name,
         &collection_name,
     ).await;
+    let email: &String = &reservation_email.email;
+    if let Err(error) = email::is_valid_email(&email).await {
+        return error;
+    }
     match repository {
         Ok(repository) => {
             let result_from_email: Vec<Value> = repository.get_reservation_from_email(reservation_email).await.unwrap();
             Ok((StatusCode::CREATED, Json(result_from_email)))
         }
         Err(error) => {
-            let error_json: Value = message_json::send_message_error(400, &error.to_string()).await;
+            let error_json: Value = message_json::send_message_error(400, &error.to_string().as_str()).await;
             Err((StatusCode::BAD_REQUEST, Json(error_json)))
         }
     }
