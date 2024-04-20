@@ -3,11 +3,13 @@ use mongodb::Cursor;
 use mongodb::Database;
 use mongodb::error::Error;
 use mongodb::Client;
+use mongodb::options::FindOptions;
 use mongodb::bson::doc;
 use futures::StreamExt;
 use serde_json::Value;
 use crate::entity::reservation::Reservation;
 use crate::entity::email_reservation::ReservationEmail;
+use crate::entity::check_in_date::ReservationCheckInDate;
 
 
 pub struct ReservationRepository {
@@ -41,4 +43,31 @@ impl ReservationRepository {
         }
         Ok(reservation_result)
     }
+
+    pub async fn get_reservation_from_check_in_date(&self, reservation_check_in_date: ReservationCheckInDate) -> Result<Vec<Value>, Error> {
+        let check_in_date: String = reservation_check_in_date.check_in_date;
+        let mut query_options: FindOptions = FindOptions::default();
+        query_options.projection = Some(doc! {"_id":0,"name": 0});
+        let mut cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &check_in_date}, query_options).await.unwrap();
+        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
+        result_query_from_database
+    }
+
+    async fn serialize_cursor_to_json(&self, mut cursor: Cursor<Reservation>) -> Result<Vec<Value>, Error> {
+        let mut reservation_result: Vec<Value> = Vec::new();
+        while let Some(document) = cursor.next().await {
+            match document {
+                Ok(document_from_database) => {
+                    reservation_result.push(
+                        serde_json::to_value(&document_from_database).unwrap()
+                    );
+                }
+                Err(err) => {
+                    return Err(err.into());
+                }
+            }
+        }
+        Ok(reservation_result)
+    }
 }
+
