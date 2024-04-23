@@ -9,6 +9,7 @@ use serde_json::Value;
 use crate::entity::reservation::Reservation;
 use crate::entity::email_reservation::ReservationEmail;
 use crate::entity::check_in_date::ReservationCheckInDate;
+use crate::entity::check_out_date::ReservationCheckOutDate;
 
 
 pub struct ReservationRepository {
@@ -36,6 +37,13 @@ impl ReservationRepository {
     pub async fn get_reservation_from_check_in_date(&self, reservation_check_in_date: ReservationCheckInDate) -> Result<Vec<Value>, Error> {
         let check_in_date: String = reservation_check_in_date.check_in_date;
         let cursor: Cursor<Reservation> = self.collection.find(doc! {"check_in_date": &check_in_date}, None).await.unwrap();
+        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
+        result_query_from_database
+    }
+
+    pub async fn get_reservation_from_check_out_date(&self, reservation_check_in_date:ReservationCheckOutDate ) -> Result<Vec<Value>, Error> {
+        let check_out_date: String = reservation_check_in_date.check_out_date;
+        let cursor: Cursor<Reservation> = self.collection.find(doc! {"check_out_date": &check_out_date}, None).await.unwrap();
         let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
         result_query_from_database
     }
