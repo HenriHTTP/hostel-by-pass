@@ -29,26 +29,14 @@ impl ReservationRepository {
     }
     pub async fn get_reservation_from_email(&self, reservation_email: ReservationEmail) -> Result<Vec<Value>, Error> {
         let email: String = reservation_email.email;
-        let mut cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &email}, None).await.unwrap();
-        let mut reservation_result: Vec<Value> = Vec::new();
-        while let Some(document) = cursor.next().await {
-            match document {
-                Ok(document_from_database) => {
-                    reservation_result.push(
-                        serde_json::to_value(&document_from_database).unwrap()
-                    );
-                }
-                Err(err) => return Err(err.into()),
-            }
-        }
-        Ok(reservation_result)
+        let cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &email}, None).await.unwrap();
+        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
+        result_query_from_database
     }
 
     pub async fn get_reservation_from_check_in_date(&self, reservation_check_in_date: ReservationCheckInDate) -> Result<Vec<Value>, Error> {
         let check_in_date: String = reservation_check_in_date.check_in_date;
-        let mut query_options: FindOptions = FindOptions::default();
-        query_options.projection = Some(doc! {"_id":0,"name": 0});
-        let mut cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &check_in_date}, query_options).await.unwrap();
+        let cursor: Cursor<Reservation> = self.collection.find(doc! {"check_in_date": &check_in_date}, None).await.unwrap();
         let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
         result_query_from_database
     }
