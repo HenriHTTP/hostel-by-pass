@@ -7,7 +7,6 @@ use axum::response::IntoResponse;
 use axum::Json;
 use serde_json::{json, Value};
 use std::env;
-use mongodb::error::Error;
 
 pub async fn get_reservation_by_email(Json(reservation_email): Json<ReservationEmail>) -> impl IntoResponse {
     let collection_name: String = env::var("COLLECTION_NAME").unwrap_or_default();
