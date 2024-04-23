@@ -3,7 +3,6 @@ use mongodb::Cursor;
 use mongodb::Database;
 use mongodb::error::Error;
 use mongodb::Client;
-use mongodb::options::FindOptions;
 use mongodb::bson::doc;
 use futures::StreamExt;
 use serde_json::Value;
