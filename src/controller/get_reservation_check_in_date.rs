@@ -1,14 +1,16 @@
 use crate::entity::check_in_date::ReservationCheckInDate;
 use crate::repository::reservation_repository::ReservationRepository;
+use crate::service::database;
 use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
-use serde_json::{json, Value};
+use serde_json::json;
+use serde_json::Value;
 use std::env;
-use crate::service::database;
 
-pub async fn get_reservation_by_date(Json(reservation_date): Json<ReservationCheckInDate>) -> impl IntoResponse {
+
+pub async fn get_reservation_check_in_date(Json(reservation_date): Json<ReservationCheckInDate>) -> impl IntoResponse {
     let collection_name: String = env::var("COLLECTION_NAME").unwrap_or_default();
     let db_name: String = env::var("DATABASE_NAME").unwrap_or_default();
     let uri: String = env::var("MONGO_URL").unwrap_or_default();
