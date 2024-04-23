@@ -1,6 +1,7 @@
 use crate::entity::reservation::Reservation;
 use crate::repository::reservation_repository::ReservationRepository;
 use crate::service::email;
+use crate::service::database;
 use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -8,7 +9,6 @@ use axum::Json;
 use serde_json::Value;
 use std::env;
 use mongodb::error::Error;
-
 
 
 pub async fn create_reservation(Json(reservation): Json<Reservation>) -> impl IntoResponse {
@@ -22,11 +22,7 @@ pub async fn create_reservation(Json(reservation): Json<Reservation>) -> impl In
     let collection_name: String = env::var("COLLECTION_NAME").unwrap_or_default();
     let db_name: String = env::var("DATABASE_NAME").unwrap_or_default();
     let uri: String = env::var("MONGO_URL").unwrap_or_default();
-    let repository: Result<ReservationRepository, Error> = ReservationRepository::new(
-        &uri,
-        &db_name,
-        &collection_name,
-    ).await;
+    let repository: Result<ReservationRepository, Error> = database::connect(collection_name, db_name, uri).await;
     match repository {
         Ok(repository) => {
             repository.insert(reservation).await.unwrap();
