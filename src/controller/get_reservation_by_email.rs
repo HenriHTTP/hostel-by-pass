@@ -1,6 +1,6 @@
 use crate::entity::email_reservation::ReservationEmail;
 use crate::repository::reservation_repository::ReservationRepository;
-use crate::service::email;
+use crate::service::{database, email};
 use crate::helper::message_json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -12,11 +12,7 @@ pub async fn get_reservation_by_email(Json(reservation_email): Json<ReservationE
     let collection_name: String = env::var("COLLECTION_NAME").unwrap_or_default();
     let db_name: String = env::var("DATABASE_NAME").unwrap_or_default();
     let uri: String = env::var("MONGO_URL").unwrap_or_default();
-    let repository = match ReservationRepository::new(
-        &uri,
-        &db_name,
-        &collection_name,
-    ).await {
+    let repository: ReservationRepository = match database::connect(collection_name, db_name, uri).await {
         Ok(repository) => repository,
         Err(error) => {
             let error_json: Value = message_json::send_message_error(400, &error.to_string().as_str()).await;
