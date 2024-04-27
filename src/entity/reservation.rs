@@ -11,4 +11,5 @@ pub struct Reservation {
     pub check_out_date: String,
     pub num_guests: u32,
     pub special_requests: Option<Vec<String>>,
+    pub active: bool
 }
