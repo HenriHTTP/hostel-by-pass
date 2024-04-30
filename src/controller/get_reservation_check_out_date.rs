@@ -28,5 +28,17 @@ pub async fn get_reservation_check_out_date(Json(reservation_date): Json<Reserva
             return Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_json)));
         }
     };
+
+    if let Err(error) = vec_is_empty(result_from_check_out_date.clone()).await {
+        return Err(error);
+    }
     Ok((StatusCode::CREATED, Json(json!({"content": result_from_check_out_date}))))
+}
+
+async fn vec_is_empty( result_query: Vec<Value>) ->  Result<(), (StatusCode, Json<Value>)>{
+    let json_error: Value = message_json::send_message_error(500,"date is not found").await;
+    if result_query.is_empty(){
+        return Err((StatusCode::BAD_REQUEST,Json(json_error)))
+    }
+    Ok(())
 }
