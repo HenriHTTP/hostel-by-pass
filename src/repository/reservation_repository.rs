@@ -1,4 +1,5 @@
 use mongodb::Collection;
+use mongodb::bson::Document;
 use mongodb::Cursor;
 use mongodb::Database;
 use mongodb::error::Error;
@@ -11,6 +12,17 @@ use crate::entity::email_reservation::ReservationEmail;
 use crate::entity::check_in_date::ReservationCheckInDate;
 use crate::entity::check_out_date::ReservationCheckOutDate;
 
+
+pub trait ReservationSearch {
+    async fn search(&self, query: Document) -> Result<Vec<Value>, Error>;
+}
+
+impl ReservationSearch for ReservationRepository {
+    async fn search(&self, query: Document) -> Result<Vec<Value>, Error> {
+        let cursor: Cursor<Reservation> = self.collection.find(query, None).await.unwrap();
+        self.serialize_cursor_to_json(cursor).await
+    }
+}
 
 pub struct ReservationRepository {
     collection: Collection<Reservation>,
@@ -29,23 +41,20 @@ impl ReservationRepository {
     }
     pub async fn get_reservation_from_email(&self, reservation_email: ReservationEmail) -> Result<Vec<Value>, Error> {
         let email: String = reservation_email.email;
-        let cursor: Cursor<Reservation> = self.collection.find(doc! {"email": &email}, None).await.unwrap();
-        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
-        result_query_from_database
+        let query: Document = doc! {"email": &email};
+        self.search(query).await
     }
 
     pub async fn get_reservation_from_check_in_date(&self, reservation_check_in_date: ReservationCheckInDate) -> Result<Vec<Value>, Error> {
         let check_in_date: String = reservation_check_in_date.check_in_date;
-        let cursor: Cursor<Reservation> = self.collection.find(doc! {"check_in_date": &check_in_date}, None).await.unwrap();
-        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
-        result_query_from_database
+        let query: Document = doc! {"check_in_date": &check_in_date};
+        self.search(query).await
     }
 
-    pub async fn get_reservation_from_check_out_date(&self, reservation_check_in_date:ReservationCheckOutDate ) -> Result<Vec<Value>, Error> {
+    pub async fn get_reservation_from_check_out_date(&self, reservation_check_in_date: ReservationCheckOutDate) -> Result<Vec<Value>, Error> {
         let check_out_date: String = reservation_check_in_date.check_out_date;
-        let cursor: Cursor<Reservation> = self.collection.find(doc! {"check_out_date": &check_out_date}, None).await.unwrap();
-        let result_query_from_database = self.serialize_cursor_to_json(cursor).await;
-        result_query_from_database
+        let query: Document = doc! {"check_out_date": &check_out_date};
+        self.search(query).await
     }
 
     async fn serialize_cursor_to_json(&self, mut cursor: Cursor<Reservation>) -> Result<Vec<Value>, Error> {
